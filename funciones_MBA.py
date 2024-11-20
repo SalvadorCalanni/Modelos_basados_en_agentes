@@ -2,9 +2,6 @@ import networkx as nx
 import numpy as np
 
 
-def numero():
-  '''Devuelve un número'''
-  return 5
 
 def generar_estimulo(coclea, largo):
   '''Genera un estímulo de largo 'largo' en la red coclea'''
@@ -30,6 +27,17 @@ def generar_estimulos_dist_rand(coclea, largo_max):
   estim2 = generar_estimulo(coclea, largo)
   return estim1 + estim2
   
+def generar_estimulos_dist_rand_largo_fijo(coclea, largo):
+  estim1 = generar_estimulo(coclea, largo)
+  estim2 = generar_estimulo(coclea, largo)
+  return estim1 + estim2
+
+def generar_estimulos_largo_partido(coclea, largo, cantidad):
+  largo_ind = largo // cantidad
+  estimulos = []
+  for i in range(cantidad):
+    estimulos += generar_estimulo(coclea, largo_ind)
+  return estimulos
 
 def vertices_estimulo(nucleo, estimulo):
   '''Devuelve los vértices del núcleo que están en el estímulo'''
@@ -43,7 +51,7 @@ def actualizar_pesos(nucleo, edges_estimulo, estimulo):
   '''Actualiza los pesos de las aristas del núcleo que están en el estímulo'''
   for j in edges_estimulo:
     if j[0] in estimulo and j[1] in estimulo:
-      nucleo[j[0]][j[1]]['weight'] = nucleo[j[0]][j[1]]['weight'] + 1
+      nucleo[j[0]][j[1]]['weight'] = nucleo[j[0]][j[1]]['weight'] + 2
     else:
       nucleo[j[0]][j[1]]['weight'] = nucleo[j[0]][j[1]]['weight'] - 1
       
