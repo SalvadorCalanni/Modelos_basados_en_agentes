@@ -74,3 +74,41 @@ def iniciar_red (n_neu, peso_inicial):
         nucleo[u][v]['weight'] = peso_inicial
     return nucleo, coclea    
  
+def entrenar(nucleo, coclea, largo_estim, cantidad_estim, pasos):
+    
+    lista_vertices = []
+    for i in range(pasos):
+
+        estim = generar_estimulos_largo_partido(coclea, largo_estim, cantidad_estim)
+
+        edges_estimulo = vertices_estimulo(nucleo, estim)
+
+        actualizar_pesos(nucleo, edges_estimulo, estim)
+
+        eliminar_pesos_negativos(nucleo)
+
+        lista_vertices.append(len(list(nucleo.edges())))
+    
+    return lista_vertices
+ 
+def x_tau_porcentaje (lista_vertices, porcentaje):
+    valor = (max(lista_vertices)-min(lista_vertices))*(porcentaje/100)+min(lista_vertices)
+    dif = []
+    
+    i = 0
+    me_pase = False #hago esto porque sabemos que una vez que pase ese valor se va a alejar
+    
+    while i < len(lista_vertices) and not me_pase:
+        if lista_vertices[i]-valor < 0:
+            me_pase = True
+        dif.append(abs(lista_vertices[i]-valor))
+        i += 1
+        
+    return (dif.index(min(dif)), valor)
+  
+def x_tau_medio (lista_vertices):
+    y = (lista_vertices[0] + lista_vertices[-1]) / 2 
+    dif = []
+    for i in lista_vertices:
+        dif.append(abs(i-y))
+    return (dif.index(min(dif)), y)
