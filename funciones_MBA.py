@@ -54,7 +54,30 @@ def actualizar_pesos(nucleo, edges_estimulo, estimulo):
       nucleo[j[0]][j[1]]['weight'] = nucleo[j[0]][j[1]]['weight'] + 2
     else:
       nucleo[j[0]][j[1]]['weight'] = nucleo[j[0]][j[1]]['weight'] - 1
-      
+
+def actualizar_pesos_limite(nucleo, edges_estimulo, estimulo, peso_total):
+  '''Actualiza los pesos de las aristas del núcleo que están en el estímulo'''
+
+  peso_a_repartir = repartir_peso(len(nucleo.nodes()), len(estimulo), peso_total)
+
+  for j in edges_estimulo:
+    if j[0] in estimulo and j[1] in estimulo:
+      nucleo[j[0]][j[1]]['weight'] = nucleo[j[0]][j[1]]['weight'] + peso_a_repartir
+    else:
+      nucleo[j[0]][j[1]]['weight'] = nucleo[j[0]][j[1]]['weight'] - 1
+
+def actualizar_pesos_limite_resto(nucleo, edges_estimulo, estimulo, premio_total, resto_total):
+  '''Actualiza los pesos de las aristas del núcleo que están en el estímulo'''
+
+  premio_a_repartir = repartir_peso(len(nucleo.nodes()), len(estimulo), premio_total)
+  resto_a_repartir = repartir_peso(len(nucleo.nodes()), len(estimulo), resto_total)
+
+
+  for j in edges_estimulo:
+    if j[0] in estimulo and j[1] in estimulo:
+      nucleo[j[0]][j[1]]['weight'] = nucleo[j[0]][j[1]]['weight'] + premio_a_repartir
+    else:
+      nucleo[j[0]][j[1]]['weight'] = nucleo[j[0]][j[1]]['weight'] - resto_a_repartir
       
 def eliminar_pesos_negativos(nucleo):
   '''Elimina las aristas con peso negativo'''
@@ -90,6 +113,41 @@ def entrenar(nucleo, coclea, largo_estim, cantidad_estim, pasos):
         lista_vertices.append(len(list(nucleo.edges())))
     
     return lista_vertices
+
+def entrenar_peso_limite(nucleo, coclea, largo_estim, cantidad_estim, pasos, peso_total):
+
+    lista_vertices = []
+    for i in range(pasos):
+
+        estim = generar_estimulos_largo_partido(coclea, largo_estim, cantidad_estim)
+
+        edges_estimulo = vertices_estimulo(nucleo, estim)
+
+        actualizar_pesos_limite(nucleo, edges_estimulo, estim, peso_total)
+
+        eliminar_pesos_negativos(nucleo)
+
+        lista_vertices.append(len(list(nucleo.edges())))
+
+    return lista_vertices
+
+def entrenar_peso_limite_resto(nucleo, coclea, largo_estim, cantidad_estim, pasos, peso_total, resto_total):
+
+    lista_vertices = []
+    for i in range(pasos):
+
+        estim = generar_estimulos_largo_partido(coclea, largo_estim, cantidad_estim)
+
+        edges_estimulo = vertices_estimulo(nucleo, estim)
+
+        actualizar_pesos_limite_resto(nucleo, edges_estimulo, estim, peso_total, resto_total)
+
+        eliminar_pesos_negativos(nucleo)
+
+        lista_vertices.append(len(list(nucleo.edges())))
+
+    return lista_vertices
+
  
 def x_tau_porcentaje (lista_vertices, porcentaje):
     valor = (max(lista_vertices)-min(lista_vertices))*(porcentaje/100)+min(lista_vertices)
@@ -112,3 +170,13 @@ def x_tau_medio (lista_vertices):
     for i in lista_vertices:
         dif.append(abs(i-y))
     return (dif.index(min(dif)), y)
+
+def cantidad_links_segun_estimulo (n_neu, estim): ####Creo que esto es lo mismo que vertices_estimulo -- len(vertices_estimulo)
+  ###Total de conexiones activadas = conexiones internas (por estimulo) + conexiones entre neuronas activadas-no activadas
+  con_inter = (estim*(estim-1))/2
+  con_act_no_act = estim*(n_neu-estim)
+  return int(con_inter+con_act_no_act)
+
+def repartir_peso (n_neu, estim, peso_total):
+  conexiones = cantidad_links_segun_estimulo(n_neu, estim)
+  return peso_total/conexiones
